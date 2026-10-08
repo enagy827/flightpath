@@ -1,0 +1,836 @@
+{
+ "capacity_validation": {
+  "source": "notebook 01, section 7",
+  "quarters": [
+   {
+    "quarter": "2022Q1",
+    "estimate_bn": 46.99,
+    "bts_bn": 47.33,
+    "error_pct": -0.7
+   },
+   {
+    "quarter": "2022Q2",
+    "estimate_bn": 53.39,
+    "bts_bn": 54.24,
+    "error_pct": -1.57
+   },
+   {
+    "quarter": "2022Q3",
+    "estimate_bn": 57.96,
+    "bts_bn": 58.45,
+    "error_pct": -0.85
+   },
+   {
+    "quarter": "2022Q4",
+    "estimate_bn": 56.22,
+    "bts_bn": 55.36,
+    "error_pct": 1.55
+   },
+   {
+    "quarter": "2023Q1",
+    "estimate_bn": 56.58,
+    "bts_bn": 57.32,
+    "error_pct": -1.3
+   },
+   {
+    "quarter": "2023Q2",
+    "estimate_bn": 67.31,
+    "bts_bn": 64.97,
+    "error_pct": 3.6
+   },
+   {
+    "quarter": "2023Q3",
+    "estimate_bn": 68.15,
+    "bts_bn": 69.17,
+    "error_pct": -1.47
+   },
+   {
+    "quarter": "2023Q4",
+    "estimate_bn": 62.96,
+    "bts_bn": 64.2,
+    "error_pct": -1.93
+   },
+   {
+    "quarter": "2024Q1",
+    "estimate_bn": 64.37,
+    "bts_bn": 61.26,
+    "error_pct": 5.07
+   },
+   {
+    "quarter": "2024Q2",
+    "estimate_bn": 69.17,
+    "bts_bn": 70.13,
+    "error_pct": -1.37
+   },
+   {
+    "quarter": "2024Q3",
+    "estimate_bn": 71.84,
+    "bts_bn": 71.62,
+    "error_pct": 0.31
+   },
+   {
+    "quarter": "2024Q4",
+    "estimate_bn": 67.95,
+    "bts_bn": 67.22,
+    "error_pct": 1.09
+   },
+   {
+    "quarter": "2025Q1",
+    "estimate_bn": 63.5,
+    "bts_bn": 63.57,
+    "error_pct": -0.12
+   },
+   {
+    "quarter": "2025Q2",
+    "estimate_bn": 73.0,
+    "bts_bn": 72.49,
+    "error_pct": 0.7
+   },
+   {
+    "quarter": "2025Q3",
+    "estimate_bn": 73.52,
+    "bts_bn": 73.83,
+    "error_pct": -0.41
+   },
+   {
+    "quarter": "2025Q4",
+    "estimate_bn": 68.54,
+    "bts_bn": 67.85,
+    "error_pct": 1.01
+   },
+   {
+    "quarter": "2026Q1",
+    "estimate_bn": 63.21,
+    "bts_bn": 64.22,
+    "error_pct": -1.58
+   },
+   {
+    "quarter": "2026Q2",
+    "estimate_bn": 74.28,
+    "bts_bn": 73.29,
+    "error_pct": 1.36
+   }
+  ],
+  "benchmarks": {
+   "benchmark: same as last year": {
+    "mae_all": 9.66,
+    "mae_selection": 15.3,
+    "mae_heldout": 2.6,
+    "largest": 23.95
+   },
+   "benchmark: last year x latest known growth": {
+    "mae_all": 2.51,
+    "mae_selection": 3.6,
+    "mae_heldout": 1.15,
+    "largest": 9.15
+   },
+   "OpenSky (chosen method)": {
+    "mae_all": 1.44,
+    "mae_selection": 1.94,
+    "mae_heldout": 0.82,
+    "largest": 5.07
+   }
+  }
+ },
+ "fuel_monthly": {
+  "source": "EIA U.S. Gulf Coast jet fuel (14 days earlier) vs BTS Form 41 P-12(a), Delta mainline",
+  "months": [
+   {
+    "month": "2017-01",
+    "market_14d_earlier": 1.5178,
+    "delta_paid": 1.6682
+   },
+   {
+    "month": "2017-02",
+    "market_14d_earlier": 1.5192,
+    "delta_paid": 1.8002
+   },
+   {
+    "month": "2017-03",
+    "market_14d_earlier": 1.4997,
+    "delta_paid": 1.678
+   },
+   {
+    "month": "2017-04",
+    "market_14d_earlier": 1.4804,
+    "delta_paid": 1.6936
+   },
+   {
+    "month": "2017-05",
+    "market_14d_earlier": 1.421,
+    "delta_paid": 1.6979
+   },
+   {
+    "month": "2017-06",
+    "market_14d_earlier": 1.3722,
+    "delta_paid": 1.6386
+   },
+   {
+    "month": "2017-07",
+    "market_14d_earlier": 1.3171,
+    "delta_paid": 1.6635
+   },
+   {
+    "month": "2017-08",
+    "market_14d_earlier": 1.5059,
+    "delta_paid": 1.5983
+   },
+   {
+    "month": "2017-09",
+    "market_14d_earlier": 1.7354,
+    "delta_paid": 1.7575
+   },
+   {
+    "month": "2017-10",
+    "market_14d_earlier": 1.6772,
+    "delta_paid": 1.8999
+   },
+   {
+    "month": "2017-11",
+    "market_14d_earlier": 1.7139,
+    "delta_paid": 1.9361
+   },
+   {
+    "month": "2017-12",
+    "market_14d_earlier": 1.7808,
+    "delta_paid": 1.9671
+   },
+   {
+    "month": "2018-01",
+    "market_14d_earlier": 1.8996,
+    "delta_paid": 2.066
+   },
+   {
+    "month": "2018-02",
+    "market_14d_earlier": 1.9091,
+    "delta_paid": 2.0516
+   },
+   {
+    "month": "2018-03",
+    "market_14d_earlier": 1.8291,
+    "delta_paid": 1.9004
+   },
+   {
+    "month": "2018-04",
+    "market_14d_earlier": 1.9464,
+    "delta_paid": 2.1785
+   },
+   {
+    "month": "2018-05",
+    "market_14d_earlier": 2.1069,
+    "delta_paid": 2.1162
+   },
+   {
+    "month": "2018-06",
+    "market_14d_earlier": 2.1365,
+    "delta_paid": 2.1694
+   },
+   {
+    "month": "2018-07",
+    "market_14d_earlier": 2.0874,
+    "delta_paid": 2.2573
+   },
+   {
+    "month": "2018-08",
+    "market_14d_earlier": 2.0915,
+    "delta_paid": 2.1831
+   },
+   {
+    "month": "2018-09",
+    "market_14d_earlier": 2.1689,
+    "delta_paid": 2.2362
+   },
+   {
+    "month": "2018-10",
+    "market_14d_earlier": 2.2486,
+    "delta_paid": 2.4431
+   },
+   {
+    "month": "2018-11",
+    "market_14d_earlier": 2.114,
+    "delta_paid": 2.4644
+   },
+   {
+    "month": "2018-12",
+    "market_14d_earlier": 1.7833,
+    "delta_paid": 2.4515
+   },
+   {
+    "month": "2019-01",
+    "market_14d_earlier": 1.7157,
+    "delta_paid": 2.0547
+   },
+   {
+    "month": "2019-02",
+    "market_14d_earlier": 1.8486,
+    "delta_paid": 2.0656
+   },
+   {
+    "month": "2019-03",
+    "market_14d_earlier": 1.9278,
+    "delta_paid": 2.0312
+   },
+   {
+    "month": "2019-04",
+    "market_14d_earlier": 1.9345,
+    "delta_paid": 2.0216
+   },
+   {
+    "month": "2019-05",
+    "market_14d_earlier": 1.9977,
+    "delta_paid": 2.058
+   },
+   {
+    "month": "2019-06",
+    "market_14d_earlier": 1.8516,
+    "delta_paid": 2.1205
+   },
+   {
+    "month": "2019-07",
+    "market_14d_earlier": 1.8922,
+    "delta_paid": 1.9608
+   },
+   {
+    "month": "2019-08",
+    "market_14d_earlier": 1.8465,
+    "delta_paid": 1.906
+   },
+   {
+    "month": "2019-09",
+    "market_14d_earlier": 1.8247,
+    "delta_paid": 1.9821
+   },
+   {
+    "month": "2019-10",
+    "market_14d_earlier": 1.8789,
+    "delta_paid": 1.9104
+   },
+   {
+    "month": "2019-11",
+    "market_14d_earlier": 1.8509,
+    "delta_paid": 1.9965
+   },
+   {
+    "month": "2019-12",
+    "market_14d_earlier": 1.8313,
+    "delta_paid": 2.0378
+   },
+   {
+    "month": "2020-01",
+    "market_14d_earlier": 1.9024,
+    "delta_paid": 1.9168
+   },
+   {
+    "month": "2020-02",
+    "market_14d_earlier": 1.5776,
+    "delta_paid": 1.9213
+   },
+   {
+    "month": "2020-03",
+    "market_14d_earlier": 1.2965,
+    "delta_paid": 1.6132
+   },
+   {
+    "month": "2020-04",
+    "market_14d_earlier": 0.7111,
+    "delta_paid": 4.6131
+   },
+   {
+    "month": "2020-05",
+    "market_14d_earlier": 0.5433,
+    "delta_paid": 1.5042
+   },
+   {
+    "month": "2020-06",
+    "market_14d_earlier": 0.8876,
+    "delta_paid": 1.3587
+   },
+   {
+    "month": "2020-07",
+    "market_14d_earlier": 1.0497,
+    "delta_paid": 1.186
+   },
+   {
+    "month": "2020-08",
+    "market_14d_earlier": 1.1079,
+    "delta_paid": 1.3003
+   },
+   {
+    "month": "2020-09",
+    "market_14d_earlier": 1.0633,
+    "delta_paid": 1.2836
+   },
+   {
+    "month": "2020-10",
+    "market_14d_earlier": 1.0286,
+    "delta_paid": 1.2154
+   },
+   {
+    "month": "2020-11",
+    "market_14d_earlier": 1.0651,
+    "delta_paid": 1.2188
+   },
+   {
+    "month": "2020-12",
+    "market_14d_earlier": 1.26,
+    "delta_paid": 1.9148
+   },
+   {
+    "month": "2021-01",
+    "market_14d_earlier": 1.3833,
+    "delta_paid": 1.6364
+   },
+   {
+    "month": "2021-02",
+    "market_14d_earlier": 1.4849,
+    "delta_paid": 1.6084
+   },
+   {
+    "month": "2021-03",
+    "market_14d_earlier": 1.6966,
+    "delta_paid": 2.4827
+   },
+   {
+    "month": "2021-04",
+    "market_14d_earlier": 1.626,
+    "delta_paid": 1.7641
+   },
+   {
+    "month": "2021-05",
+    "market_14d_earlier": 1.7253,
+    "delta_paid": 2.7844
+   },
+   {
+    "month": "2021-06",
+    "market_14d_earlier": 1.7932,
+    "delta_paid": 2.7844
+   },
+   {
+    "month": "2021-07",
+    "market_14d_earlier": 1.8912,
+    "delta_paid": 2.0078
+   },
+   {
+    "month": "2021-08",
+    "market_14d_earlier": 1.8467,
+    "delta_paid": 1.9515
+   },
+   {
+    "month": "2021-09",
+    "market_14d_earlier": 1.8829,
+    "delta_paid": 1.7893
+   },
+   {
+    "month": "2021-10",
+    "market_14d_earlier": 2.1804,
+    "delta_paid": 2.2581
+   },
+   {
+    "month": "2021-11",
+    "market_14d_earlier": 2.2795,
+    "delta_paid": 2.2399
+   },
+   {
+    "month": "2021-12",
+    "market_14d_earlier": 2.0715,
+    "delta_paid": 1.6771
+   },
+   {
+    "month": "2022-01",
+    "market_14d_earlier": 2.2585,
+    "delta_paid": 2.4502
+   },
+   {
+    "month": "2022-02",
+    "market_14d_earlier": 2.6161,
+    "delta_paid": 2.8184
+   },
+   {
+    "month": "2022-03",
+    "market_14d_earlier": 3.0403,
+    "delta_paid": 3.0044
+   },
+   {
+    "month": "2022-04",
+    "market_14d_earlier": 3.6694,
+    "delta_paid": 3.1833
+   },
+   {
+    "month": "2022-05",
+    "market_14d_earlier": 4.1562,
+    "delta_paid": 3.711
+   },
+   {
+    "month": "2022-06",
+    "market_14d_earlier": 3.9389,
+    "delta_paid": 4.2445
+   },
+   {
+    "month": "2022-07",
+    "market_14d_earlier": 3.7882,
+    "delta_paid": 3.3479
+   },
+   {
+    "month": "2022-08",
+    "market_14d_earlier": 3.2808,
+    "delta_paid": 3.4627
+   },
+   {
+    "month": "2022-09",
+    "market_14d_earlier": 3.3964,
+    "delta_paid": 3.7239
+   },
+   {
+    "month": "2022-10",
+    "market_14d_earlier": 3.4688,
+    "delta_paid": 3.3517
+   },
+   {
+    "month": "2022-11",
+    "market_14d_earlier": 3.5401,
+    "delta_paid": 2.9078
+   },
+   {
+    "month": "2022-12",
+    "market_14d_earlier": 2.8432,
+    "delta_paid": 3.167
+   },
+   {
+    "month": "2023-01",
+    "market_14d_earlier": 3.2255,
+    "delta_paid": 3.1093
+   },
+   {
+    "month": "2023-02",
+    "market_14d_earlier": 3.2646,
+    "delta_paid": 2.9969
+   },
+   {
+    "month": "2023-03",
+    "market_14d_earlier": 2.7728,
+    "delta_paid": 2.9378
+   },
+   {
+    "month": "2023-04",
+    "market_14d_earlier": 2.5454,
+    "delta_paid": 2.6633
+   },
+   {
+    "month": "2023-05",
+    "market_14d_earlier": 2.1997,
+    "delta_paid": 2.4048
+   },
+   {
+    "month": "2023-06",
+    "market_14d_earlier": 2.2153,
+    "delta_paid": 2.4925
+   },
+   {
+    "month": "2023-07",
+    "market_14d_earlier": 2.3093,
+    "delta_paid": 2.4188
+   },
+   {
+    "month": "2023-08",
+    "market_14d_earlier": 2.7949,
+    "delta_paid": 2.7539
+   },
+   {
+    "month": "2023-09",
+    "market_14d_earlier": 3.0852,
+    "delta_paid": 3.1276
+   },
+   {
+    "month": "2023-10",
+    "market_14d_earlier": 3.0055,
+    "delta_paid": 3.0614
+   },
+   {
+    "month": "2023-11",
+    "market_14d_earlier": 2.8395,
+    "delta_paid": 3.091
+   },
+   {
+    "month": "2023-12",
+    "market_14d_earlier": 2.4561,
+    "delta_paid": 2.8303
+   },
+   {
+    "month": "2024-01",
+    "market_14d_earlier": 2.4953,
+    "delta_paid": 2.7415
+   },
+   {
+    "month": "2024-02",
+    "market_14d_earlier": 2.7,
+    "delta_paid": 2.7951
+   },
+   {
+    "month": "2024-03",
+    "market_14d_earlier": 2.6071,
+    "delta_paid": 2.7147
+   },
+   {
+    "month": "2024-04",
+    "market_14d_earlier": 2.6459,
+    "delta_paid": 2.7107
+   },
+   {
+    "month": "2024-05",
+    "market_14d_earlier": 2.4453,
+    "delta_paid": 2.6385
+   },
+   {
+    "month": "2024-06",
+    "market_14d_earlier": 2.3389,
+    "delta_paid": 2.5461
+   },
+   {
+    "month": "2024-07",
+    "market_14d_earlier": 2.4838,
+    "delta_paid": 2.6117
+   },
+   {
+    "month": "2024-08",
+    "market_14d_earlier": 2.2679,
+    "delta_paid": 2.5556
+   },
+   {
+    "month": "2024-09",
+    "market_14d_earlier": 2.0526,
+    "delta_paid": 2.4317
+   },
+   {
+    "month": "2024-10",
+    "market_14d_earlier": 2.0508,
+    "delta_paid": 2.4062
+   },
+   {
+    "month": "2024-11",
+    "market_14d_earlier": 2.0438,
+    "delta_paid": 2.2842
+   },
+   {
+    "month": "2024-12",
+    "market_14d_earlier": 2.069,
+    "delta_paid": 2.3407
+   },
+   {
+    "month": "2025-01",
+    "market_14d_earlier": 2.2529,
+    "delta_paid": 2.4976
+   },
+   {
+    "month": "2025-02",
+    "market_14d_earlier": 2.3191,
+    "delta_paid": 2.391
+   },
+   {
+    "month": "2025-03",
+    "market_14d_earlier": 2.1261,
+    "delta_paid": 2.4604
+   },
+   {
+    "month": "2025-04",
+    "market_14d_earlier": 2.0188,
+    "delta_paid": 2.2774
+   },
+   {
+    "month": "2025-05",
+    "market_14d_earlier": 1.9606,
+    "delta_paid": 2.2792
+   },
+   {
+    "month": "2025-06",
+    "market_14d_earlier": 1.9677,
+    "delta_paid": 2.2434
+   },
+   {
+    "month": "2025-07",
+    "market_14d_earlier": 2.2198,
+    "delta_paid": 2.2013
+   },
+   {
+    "month": "2025-08",
+    "market_14d_earlier": 2.1304,
+    "delta_paid": 2.1773
+   },
+   {
+    "month": "2025-09",
+    "market_14d_earlier": 2.0594,
+    "delta_paid": 2.3273
+   },
+   {
+    "month": "2025-10",
+    "market_14d_earlier": 2.0989,
+    "delta_paid": 2.2148
+   },
+   {
+    "month": "2025-11",
+    "market_14d_earlier": 2.2564,
+    "delta_paid": 2.2823
+   },
+   {
+    "month": "2025-12",
+    "market_14d_earlier": 2.0891,
+    "delta_paid": 2.2895
+   },
+   {
+    "month": "2026-01",
+    "market_14d_earlier": 1.9292,
+    "delta_paid": 2.3698
+   },
+   {
+    "month": "2026-02",
+    "market_14d_earlier": 2.1407,
+    "delta_paid": 2.4022
+   },
+   {
+    "month": "2026-03",
+    "market_14d_earlier": 2.9508,
+    "delta_paid": 3.0055
+   },
+   {
+    "month": "2026-04",
+    "market_14d_earlier": 3.9885,
+    "delta_paid": 3.8729
+   },
+   {
+    "month": "2026-05",
+    "market_14d_earlier": 4.0394,
+    "delta_paid": 4.007
+   },
+   {
+    "month": "2026-06",
+    "market_14d_earlier": 3.4343,
+    "delta_paid": 3.8554
+   }
+  ],
+  "corr": 0.81
+ },
+ "mainline_share": {
+  "source": "BTS T-100 Delta mainline seat-miles / Delta's reported seat-miles",
+  "quarters": [
+   {
+    "quarter": "2019Q1",
+    "share": 0.8965
+   },
+   {
+    "quarter": "2019Q2",
+    "share": 0.9075
+   },
+   {
+    "quarter": "2019Q3",
+    "share": 0.9148
+   },
+   {
+    "quarter": "2019Q4",
+    "share": 0.9062
+   },
+   {
+    "quarter": "2020Q1",
+    "share": 0.8987
+   },
+   {
+    "quarter": "2020Q2",
+    "share": 0.858
+   },
+   {
+    "quarter": "2020Q3",
+    "share": 0.885
+   },
+   {
+    "quarter": "2020Q4",
+    "share": 0.8909
+   },
+   {
+    "quarter": "2021Q1",
+    "share": 0.8971
+   },
+   {
+    "quarter": "2021Q2",
+    "share": 0.8943
+   },
+   {
+    "quarter": "2021Q3",
+    "share": 0.9018
+   },
+   {
+    "quarter": "2021Q4",
+    "share": 0.9037
+   },
+   {
+    "quarter": "2022Q1",
+    "share": 0.9135
+   },
+   {
+    "quarter": "2022Q2",
+    "share": 0.9208
+   },
+   {
+    "quarter": "2022Q3",
+    "share": 0.9277
+   },
+   {
+    "quarter": "2022Q4",
+    "share": 0.9304
+   },
+   {
+    "quarter": "2023Q1",
+    "share": 0.9343
+   },
+   {
+    "quarter": "2023Q2",
+    "share": 0.9416
+   },
+   {
+    "quarter": "2023Q3",
+    "share": 0.9446
+   },
+   {
+    "quarter": "2023Q4",
+    "share": 0.9377
+   },
+   {
+    "quarter": "2024Q1",
+    "share": 0.9347
+   },
+   {
+    "quarter": "2024Q2",
+    "share": 0.9394
+   },
+   {
+    "quarter": "2024Q3",
+    "share": 0.9404
+   },
+   {
+    "quarter": "2024Q4",
+    "share": 0.9332
+   },
+   {
+    "quarter": "2025Q1",
+    "share": 0.9294
+   },
+   {
+    "quarter": "2025Q2",
+    "share": 0.9337
+   },
+   {
+    "quarter": "2025Q3",
+    "share": 0.9339
+   },
+   {
+    "quarter": "2025Q4",
+    "share": 0.9302
+   },
+   {
+    "quarter": "2026Q1",
+    "share": 0.9285
+   },
+   {
+    "quarter": "2026Q2",
+    "share": 0.9313
+   }
+  ]
+ }
+}

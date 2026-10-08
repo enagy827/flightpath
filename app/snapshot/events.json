@@ -1,0 +1,356 @@
+{
+ "events": [
+  {
+   "id": "outage_jul2024",
+   "name": "Delta IT outage (CrowdStrike), July 2024",
+   "what": "About 7,000 flights cancelled over five days; Delta's own measured cost.",
+   "levers": {
+    "outage": 1.0
+   },
+   "measured": "Revenue -$380M, non-fuel costs +$170M, fuel -$50M (Delta's Q3 2024 earnings release). BTS On-Time counts 7,004 cancelled Delta + Endeavor flights, 16-24 Jul 2024.",
+   "scale_rule": "outage = cancelled flights / 7,004 (e.g. 3,500 cancellations -> 0.5)."
+  },
+  {
+   "id": "fuel_sep2023",
+   "name": "Jet fuel spike, summer 2023 (led to Delta's 14 Sep 2023 EPS cut)",
+   "what": "Market jet fuel rose sharply between Delta's July guidance and mid-September.",
+   "levers": {
+    "fuel_pct": 30.1
+   },
+   "measured": "Market jet fuel (US Gulf Coast, EIA), 5-day average: $2.40/gal the week after the July 2023 guidance -> $3.12/gal the day before the cut (+30%).",
+   "scale_rule": "Use `fuel_pct` = the expected change in market jet fuel for the rest of the quarter."
+  },
+  {
+   "id": "demand_mar2025",
+   "name": "Softer demand, March 2025 (Delta cut revenue growth guidance from 7-9% to 3-4%)",
+   "what": "Delta cited softer close-in demand (consumer and corporate confidence).",
+   "levers": {
+    "demand_pts": -11.0
+   },
+   "measured": "Delta's revenue growth guidance fell 4.5 points (midpoints 8% -> 3.5%); in the simulator (Q1 2025, as of 9 Mar 2025) that takes demand -11.0 points.",
+   "scale_rule": "Use `demand_pts`; calibration below gives the demand change that matches Delta's cut."
+  }
+ ],
+ "levers": {
+  "fuel_pct": "market jet fuel x% higher (+) or lower (-) than today's price, from today to the end of the quarter",
+  "capacity_pct": "Delta flies x% more (+) or fewer (-) seat-miles than the base case from today to the end of the quarter (PLANNED schedule changes)",
+  "demand_pts": "industry passenger growth from today to the end of the quarter, percentage points added to the base case",
+  "fare_pct": "fares x% higher from today to the end of the quarter, for reasons other than fuel, load factor and persistence (e.g. a fare war: negative)",
+  "nonfuel_pct": "non-fuel costs x% above the base case from today to the end of the quarter (e.g. a new labor contract)",
+  "outage": "size of an operational meltdown happening in the rest of the quarter, relative to Delta's July 2024 outage (1 = the same)"
+ },
+ "measured_disruptions": [
+  {
+   "dates": "28 Jan 2019 - 30 Jan 2019",
+   "cancelled_flights": 324,
+   "weather_share_pct": 81,
+   "top_airports": {
+    "ATL": 93,
+    "ORD": 43,
+    "LGA": 21,
+    "DTW": 20
+   },
+   "outage_equivalent": 0.05,
+   "public_from": "2019-04-01"
+  },
+  {
+   "dates": "11 Feb 2019 - 13 Feb 2019",
+   "cancelled_flights": 361,
+   "weather_share_pct": 83,
+   "top_airports": {
+    "LGA": 81,
+    "JFK": 69,
+    "BOS": 18,
+    "PIT": 15
+   },
+   "outage_equivalent": 0.05,
+   "public_from": "2019-04-29"
+  },
+  {
+   "dates": "07 Jun 2019 - 11 Jun 2019",
+   "cancelled_flights": 592,
+   "weather_share_pct": 77,
+   "top_airports": {
+    "ATL": 163,
+    "JFK": 43,
+    "LGA": 36,
+    "DTW": 16
+   },
+   "outage_equivalent": 0.08,
+   "public_from": "2019-08-29"
+  },
+  {
+   "dates": "31 Jan 2021 - 02 Feb 2021",
+   "cancelled_flights": 407,
+   "weather_share_pct": 96,
+   "top_airports": {
+    "JFK": 75,
+    "LGA": 63,
+    "ATL": 39,
+    "BOS": 25
+   },
+   "outage_equivalent": 0.06,
+   "public_from": "2021-04-29"
+  },
+  {
+   "dates": "14 Feb 2021 - 17 Feb 2021",
+   "cancelled_flights": 625,
+   "weather_share_pct": 88,
+   "top_airports": {
+    "ATL": 208,
+    "AUS": 46,
+    "DTW": 41,
+    "SLC": 29
+   },
+   "outage_equivalent": 0.09,
+   "public_from": "2021-04-29"
+  },
+  {
+   "dates": "06 Jan 2022 - 08 Jan 2022",
+   "cancelled_flights": 399,
+   "weather_share_pct": 84,
+   "top_airports": {
+    "LGA": 79,
+    "JFK": 51,
+    "BOS": 32,
+    "ATL": 28
+   },
+   "outage_equivalent": 0.06,
+   "public_from": "2022-04-01"
+  },
+  {
+   "dates": "15 Jan 2022 - 17 Jan 2022",
+   "cancelled_flights": 520,
+   "weather_share_pct": 89,
+   "top_airports": {
+    "ATL": 183,
+    "LGA": 43,
+    "DCA": 18,
+    "DTW": 14
+   },
+   "outage_equivalent": 0.07,
+   "public_from": "2022-04-01"
+  },
+  {
+   "dates": "27 Jan 2022 - 31 Jan 2022",
+   "cancelled_flights": 1428,
+   "weather_share_pct": 88,
+   "top_airports": {
+    "JFK": 217,
+    "LGA": 212,
+    "ATL": 206,
+    "BOS": 82
+   },
+   "outage_equivalent": 0.2,
+   "public_from": "2022-04-01"
+  },
+  {
+   "dates": "01 Feb 2022 - 05 Feb 2022",
+   "cancelled_flights": 898,
+   "weather_share_pct": 96,
+   "top_airports": {
+    "ATL": 122,
+    "LGA": 121,
+    "DTW": 69,
+    "DFW": 48
+   },
+   "outage_equivalent": 0.13,
+   "public_from": "2022-04-29"
+  },
+  {
+   "dates": "27 Sep 2022 - 01 Oct 2022",
+   "cancelled_flights": 843,
+   "weather_share_pct": 90,
+   "top_airports": {
+    "ATL": 190,
+    "MCO": 103,
+    "TPA": 78,
+    "RSW": 64
+   },
+   "outage_equivalent": 0.12,
+   "public_from": "2022-12-30"
+  },
+  {
+   "dates": "21 Dec 2022 - 27 Dec 2022",
+   "cancelled_flights": 2229,
+   "weather_share_pct": 68,
+   "top_airports": {
+    "ATL": 297,
+    "DTW": 200,
+    "MSP": 189,
+    "JFK": 139
+   },
+   "outage_equivalent": 0.32,
+   "public_from": "2023-03-01"
+  },
+  {
+   "dates": "02 Jan 2023 - 04 Jan 2023",
+   "cancelled_flights": 318,
+   "weather_share_pct": 76,
+   "top_airports": {
+    "MSP": 102,
+    "ATL": 42,
+    "MCO": 10,
+    "DTW": 8
+   },
+   "outage_equivalent": 0.05,
+   "public_from": "2023-04-01"
+  },
+  {
+   "dates": "21 Feb 2023 - 24 Feb 2023",
+   "cancelled_flights": 778,
+   "weather_share_pct": 75,
+   "top_airports": {
+    "MSP": 169,
+    "DTW": 81,
+    "ATL": 43,
+    "SLC": 42
+   },
+   "outage_equivalent": 0.11,
+   "public_from": "2023-04-29"
+  },
+  {
+   "dates": "02 Mar 2023 - 05 Mar 2023",
+   "cancelled_flights": 398,
+   "weather_share_pct": 74,
+   "top_airports": {
+    "DTW": 98,
+    "ATL": 61,
+    "BOS": 16,
+    "LGA": 14
+   },
+   "outage_equivalent": 0.06,
+   "public_from": "2023-05-30"
+  },
+  {
+   "dates": "05 Aug 2023 - 08 Aug 2023",
+   "cancelled_flights": 1067,
+   "weather_share_pct": 72,
+   "top_airports": {
+    "ATL": 370,
+    "LGA": 70,
+    "DTW": 33,
+    "JFK": 24
+   },
+   "outage_equivalent": 0.15,
+   "public_from": "2023-10-30"
+  },
+  {
+   "dates": "29 Aug 2023 - 31 Aug 2023",
+   "cancelled_flights": 322,
+   "weather_share_pct": 92,
+   "top_airports": {
+    "ATL": 72,
+    "TPA": 70,
+    "LGA": 21,
+    "RSW": 13
+   },
+   "outage_equivalent": 0.05,
+   "public_from": "2023-10-30"
+  },
+  {
+   "dates": "14 Jan 2024 - 17 Jan 2024",
+   "cancelled_flights": 539,
+   "weather_share_pct": 74,
+   "top_airports": {
+    "LGA": 95,
+    "ATL": 64,
+    "BNA": 31,
+    "JFK": 27
+   },
+   "outage_equivalent": 0.08,
+   "public_from": "2024-03-31"
+  },
+  {
+   "dates": "25 Sep 2024 - 27 Sep 2024",
+   "cancelled_flights": 338,
+   "weather_share_pct": 89,
+   "top_airports": {
+    "ATL": 97,
+    "TPA": 52,
+    "RSW": 18,
+    "LGA": 17
+   },
+   "outage_equivalent": 0.05,
+   "public_from": "2024-11-29"
+  },
+  {
+   "dates": "08 Oct 2024 - 11 Oct 2024",
+   "cancelled_flights": 680,
+   "weather_share_pct": 96,
+   "top_airports": {
+    "ATL": 129,
+    "MCO": 120,
+    "TPA": 106,
+    "RSW": 41
+   },
+   "outage_equivalent": 0.1,
+   "public_from": "2024-12-30"
+  },
+  {
+   "dates": "09 Jan 2025 - 12 Jan 2025",
+   "cancelled_flights": 1243,
+   "weather_share_pct": 75,
+   "top_airports": {
+    "ATL": 536,
+    "DFW": 37,
+    "DTW": 32,
+    "MSP": 23
+   },
+   "outage_equivalent": 0.18,
+   "public_from": "2025-04-01"
+  },
+  {
+   "dates": "20 Jan 2025 - 23 Jan 2025",
+   "cancelled_flights": 665,
+   "weather_share_pct": 92,
+   "top_airports": {
+    "ATL": 259,
+    "MSY": 58,
+    "IAH": 25,
+    "DTW": 15
+   },
+   "outage_equivalent": 0.09,
+   "public_from": "2025-04-01"
+  },
+  {
+   "dates": "23 Jan 2026 - 27 Jan 2026",
+   "cancelled_flights": 2155,
+   "weather_share_pct": 85,
+   "top_airports": {
+    "ATL": 534,
+    "JFK": 112,
+    "LGA": 110,
+    "BOS": 108
+   },
+   "outage_equivalent": 0.31,
+   "public_from": "2026-04-01"
+  },
+  {
+   "dates": "30 Jan 2026 - 01 Feb 2026",
+   "cancelled_flights": 687,
+   "weather_share_pct": 81,
+   "top_airports": {
+    "ATL": 305,
+    "RDU": 16,
+    "DTW": 15,
+    "CLT": 13
+   },
+   "outage_equivalent": 0.1,
+   "public_from": "2026-04-29"
+  },
+  {
+   "dates": "21 Feb 2026 - 25 Feb 2026",
+   "cancelled_flights": 1149,
+   "weather_share_pct": 90,
+   "top_airports": {
+    "JFK": 163,
+    "LGA": 158,
+    "ATL": 128,
+    "BOS": 111
+   },
+   "outage_equivalent": 0.16,
+   "public_from": "2026-04-29"
+  }
+ ]
+}

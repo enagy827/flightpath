@@ -1,0 +1,13 @@
+{
+ "built": "2026-10-08 22:42 UTC",
+ "today": "2026-10-08",
+ "lock_sha256": "0688282b4cdd3130efab97e99c8946fd7a62e0bf106ea783a3a94a46b2da5611",
+ "data_through": {
+  "OpenSky flights (Delta + 5 rivals)": "2026-10-07",
+  "TSA checkpoint counts": "2026-10-07",
+  "Market jet fuel (EIA)": "2026-10-06",
+  "BTS T-100 (published)": "2026-06",
+  "Delta filings (SEC)": "2026-07-10"
+ },
+ "consensus_through": "2026-08-20"
+}
