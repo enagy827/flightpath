@@ -409,10 +409,10 @@ the news is in.
         fig.add_trace(go.Scatter(x=path.date, y=path.low, mode="lines", line=dict(width=0, shape="hv"), fill="tonexty",
                                  fillcolor="rgba(163,162,156,0.30)", name="Delta's guidance", hoverinfo="skip"))
         fig.add_trace(go.Scatter(x=path.date, y=path.forecast, mode="lines+markers", line=dict(color=BLUE, width=2.5),
-                                 marker=dict(size=7), name="Forecast", hovertemplate="%{x|%d %b %Y}: forecast $%{y:.2f}<extra></extra>"))
+                                 marker=dict(size=4), name="Forecast", hovertemplate="%{x|%d %b %Y}: forecast $%{y:.2f}<extra></extra>"))
         if path.street.notna().any():
             fig.add_trace(go.Scatter(x=path.date, y=path.street, mode="lines+markers", line=dict(color=ORANGE, width=2, dash="dot"),
-                                     marker=dict(size=7, symbol="diamond"), name="Wall Street",
+                                     marker=dict(size=4, symbol="diamond"), name="Wall Street",
                                      hovertemplate="%{x|%d %b %Y}: Wall Street $%{y:.2f}<extra></extra>"))
         if known_actual:
             fd = pd.Timestamp(known_actual["filed"])
@@ -425,7 +425,7 @@ the news is in.
         fig = layout(fig, 340, "How the forecast moved (EPS)")
         fig.update_layout(legend=dict(orientation="h", y=-0.15))
         st.plotly_chart(fig, width="stretch")
-        cap = ("One point per week, each using only the data public on that date. Grey band: Delta's guidance range "
+        cap = ("One point per day, each using only the data public on that date. Grey band: Delta's guidance range "
                "(it moves if Delta updates its guidance).")
         s_ = path.street
         if s_.notna().any() and s_[s_.first_valid_index():].isna().any():
@@ -439,38 +439,56 @@ the news is in.
     st.download_button("Download CSV", sc.to_csv(index=False).encode("utf-8"),
                        file_name=f"flightpath_{q}_{d:%Y-%m-%d}.csv", mime="text/csv")
 
-    # past accuracy at this point in the quarter (backtest, nearest test date)
-    off, acc = accuracy_at(q, d)
-    when = "7 days after the quarter ended" if off == "end+7" else f"on day {off} of the quarter"
+    # past accuracy at the same point in the quarter (daily forecast path)
+    when, acc = accuracy_at(q, d)
+    n_all = S_.track[S_.track.metric == "eps"].quarter.nunique()
     st.subheader("How accurate has the forecast been in past quarters?")
     md(f"For each past quarter (Q3 2023 - Q2 2026), we took what the forecast said **{when}**, using only data public "
-       f"that day, and compared it with what Delta reported at the end of the quarter. {when[0].upper() + when[1:]} is "
-       f"the test point closest to the date you picked.")
+       f"that day, and compared it with what Delta reported at the end of the quarter - the same point in the quarter "
+       f"as the date you picked.")
     md("- **Average miss:** how far off each one was from what Delta reported, on average - in cents per share for EPS, "
        "in percentage points (pts) for operating margin and revenue growth. **Smaller is better.** The same is shown for "
        "Delta's guidance midpoint and for Wall Street's consensus on the same date, for comparison.\n"
        "- **Actual inside the 80% range:** in how many of those quarters Delta's reported result landed inside the "
        "forecast's 80% range. About 8 in 10 is the target.")
-    st.dataframe(acc, width="stretch", hide_index=True)
+    if not len(acc):
+        st.caption(f"By {when.replace('on ', '', 1)}, Delta had already reported in every past quarter, so there is no "
+                   "forecast left to score at this point. Pick an earlier date, or see the Track record page.")
+    else:
+        st.dataframe(acc, width="stretch", hide_index=True)
+    if len(acc) and not acc["Actual inside the 80% range"].str.endswith(f"of {n_all} quarters").iloc[0]:
+        st.caption("Quarters where Delta had already reported by that point are left out - by then it is no longer a forecast.")
+
+
+def _fc_row(q, x, m="eps"):
+    """The forecast for one date, computed as on the Forecast page (same runs, same seed)."""
+    e = S_.entry(q, x)
+    if not e["news"]:
+        return None
+    R, S, _ = simulate(e, N, Levers())
+    f = forecast(e, R, S).get(m)
+    return {"date": pd.Timestamp(x), **{k: f[k] for k in ("forecast", "low", "high", "p10", "p90", "simulator")}} if f else None
 
 
 @st.cache_data(show_spinner=False, max_entries=64)
 def forecast_path(q, d):
-    """EPS forecast once a week through the quarter up to `d`, plus `d` itself (each date uses only what was public then)."""
-    rows = []
-    weekly = set(grid_dates(q, d, step=7)) & set(S_.dates[q])
-    for x in sorted(weekly | {pd.Timestamp(d)}):
-        e = S_.entry(q, x)
-        if not e["news"]:
-            continue
-        R, S, _ = simulate(e, N, Levers())
-        f = forecast(e, R, S).get("eps")
-        if not f:
-            continue
-        c = S_.consensus_as_of(q, x)
-        rows.append({"date": x, "forecast": f["forecast"], "low": f["low"], "high": f["high"],
-                     "street": c["eps"] if c else np.nan})
-    return pd.DataFrame(rows)
+    """EPS forecast on every day of the quarter up to `d`, each using only what was public that day - read from
+    forecast_path.csv (computed at build time, exactly as the page computes it); `d` itself is added if it isn't saved."""
+    d = pd.Timestamp(d)
+    if S_.paths is not None:
+        p = S_.paths[(S_.paths.quarter == q) & (S_.paths.metric == "eps") & (S_.paths.date <= d)]
+        p = p[["date", "forecast", "low", "high", "p10", "p90"]].copy()
+    else:                                                    # older snapshot without the file: compute every day
+        p = pd.DataFrame([r for x in sorted(S_.dates[q]) if x <= d and (r := _fc_row(q, x))])
+    if not len(p) or d not in set(p.date):
+        r = _fc_row(q, d)
+        if r:
+            p = pd.concat([p, pd.DataFrame([r])], ignore_index=True)
+    if not len(p):
+        return p
+    p = p.sort_values("date").reset_index(drop=True)
+    p["street"] = [(c["eps"] if (c := S_.consensus_as_of(q, x)) else np.nan) for x in p.date]
+    return p
 
 
 @st.cache_data(show_spinner=False, max_entries=64)
@@ -504,35 +522,59 @@ def what_changes(q, d):
     return out
 
 
+def same_point(q, d):
+    """The same point in the quarter as date `d` of quarter `q`, as a function of another quarter: the same day of the
+    quarter (day 25 = start + 25 days), or, after the quarter has ended, the same number of days after its end."""
+    Pq = pd.Period(q, "Q")
+    end = Pq.end_time.normalize()
+    if d > end:
+        j = (d - end).days
+        return f"{j} day{'s' if j > 1 else ''} after the quarter ended", lambda qq: pd.Period(qq, "Q").end_time.normalize() + pd.Timedelta(days=j)
+    k = (d - Pq.start_time).days
+    return f"on day {k} of the quarter", lambda qq: pd.Period(qq, "Q").start_time + pd.Timedelta(days=k)
+
+
+def past_at(m, at) -> pd.DataFrame:
+    """Every past quarter's forecast, 80% range, guidance and Wall Street at the date at(quarter), with the actual -
+    quarters where Delta had already reported by that date are left out."""
+    act = S_.track[S_.track.metric == m].groupby("quarter").actual.first()
+    rows = []
+    for qq, a_ in act.items():
+        x = at(qq)
+        if qq in S_.actuals and x >= pd.Timestamp(S_.actuals[qq]["filed"]):
+            continue                                  # Delta had already reported by then: not a forecast any more
+        r = S_.paths[(S_.paths.quarter == qq) & (S_.paths.metric == m) & (S_.paths.date == x)]
+        if not len(r):
+            continue
+        r = r.iloc[0]
+        c = np.nan
+        if S_.cons_hist is not None and m in S_.cons_hist.columns:
+            cr = S_.cons_hist[(S_.cons_hist.quarter == qq) & (S_.cons_hist.date == x)]
+            c = float(cr.iloc[0][m]) if len(cr) and pd.notna(cr.iloc[0][m]) else np.nan
+        rows.append({"quarter": qq, "actual": a_, "forecast": r.forecast, "guidance_low": r.low, "guidance_high": r.high,
+                     "guidance_mid": (r.low + r.high) / 2, "p10": r.p10, "p90": r.p90, "street": c,
+                     "simulator": r.get("simulator", np.nan)})
+    cols = ["quarter", "actual", "forecast", "guidance_low", "guidance_high", "guidance_mid", "p10", "p90", "street", "simulator"]
+    return pd.DataFrame(rows, columns=cols).set_index("quarter")
+
+
 @st.cache_data(show_spinner=False)
 def accuracy_at(q, d):
-    """Backtest accuracy at the test date (day 20 / 45 / 70 / 7 days after the end) closest to `d` in its quarter."""
-    Pq = pd.Period(q, "Q")
-    if d > Pq.end_time:
-        off = "end+7"
-    else:
-        day = (d - Pq.start_time).days
-        off = min(["20", "45", "70"], key=lambda o: abs(int(o) - day))
-    T = S_.track[S_.track.offset.astype(str) == off]
+    """Accuracy in past quarters (Q3 2023 - Q2 2026) at the same point in the quarter as `d`."""
+    when, at = same_point(q, pd.Timestamp(d))
     rows = []
     for m in ["eps", "operating_margin", "revenue_pct"]:
-        t = T[T.metric == m].set_index("quarter")
-        when = {qq: (pd.Period(qq, "Q").end_time.normalize() + pd.Timedelta(days=7) if off == "end+7"
-                     else pd.Period(qq, "Q").start_time + pd.Timedelta(days=int(off))) for qq in t.index}
-        cons = pd.Series(np.nan, index=t.index)
-        if S_.cons_hist is not None and m in S_.cons_hist.columns:
-            for qq in t.index:
-                r = S_.cons_hist[(S_.cons_hist.quarter == qq) & (S_.cons_hist.date == when[qq])]
-                if len(r) and pd.notna(r.iloc[0][m]):
-                    cons[qq] = float(r.iloc[0][m])
-        miss = lambda x: (x - t.actual).abs().mean()
+        t = past_at(m, at)
+        if not len(t):
+            continue
+        miss = lambda x: (x - t.actual[x.index]).abs().mean()
         f_ = lambda v: f"{v * 100:.0f}¢" if m == "eps" else f"{v:.1f} pts"
         inside = int(((t.actual >= t.p10) & (t.actual <= t.p90)).sum())
         rows.append({"Result": NICE[m], "Forecast: average miss": f_(miss(t.forecast)),
                      "Delta guidance midpoint: average miss": f_(miss(t.guidance_mid)),
-                     "Wall Street (same date): average miss": f_(miss(cons.dropna())) if cons.notna().any() else "not available",
+                     "Wall Street (same date): average miss": f_(miss(t.street.dropna())) if t.street.notna().any() else "not available",
                      "Actual inside the 80% range": f"{inside} of {len(t)} quarters"})
-    return off, pd.DataFrame(rows)
+    return when, pd.DataFrame(rows)
 
 
 def summary_table(F, cons):
@@ -1326,6 +1368,27 @@ the growth method missed by 4-9% in three of four quarters, flight tracking by a
 
 # ------------------------------------------------------------------------------------------------ 4. track record
 OFFSETS = {"20": "day 20", "45": "day 45", "70": "day 70", "end+7": "7 days after the quarter ended"}
+# with the daily forecast path: every day from day 14 (just after Delta guides) to day 89 (the last day every quarter
+# has), then 1-7 days after the quarter ended (Delta's earliest report came 8 days after) - the same point in every quarter
+DAY_KEYS = [str(k) for k in range(14, 90)] + [f"end+{j}" for j in range(1, 8)]
+
+
+def key_label(key):
+    if key.startswith("end+"):
+        j = int(key[4:])
+        return f"{j} day{'s' if j > 1 else ''} after the quarter ended"
+    return f"day {key}"
+
+
+def key_at(key):
+    if key.startswith("end+"):
+        return lambda qq: pd.Period(qq, "Q").end_time.normalize() + pd.Timedelta(days=int(key[4:]))
+    return lambda qq: pd.Period(qq, "Q").start_time + pd.Timedelta(days=int(key))
+
+
+def key_x(key):
+    """Position on the 'through the quarter' chart: the day, or 91 + days after the quarter ended."""
+    return 91 + int(key[4:]) if key.startswith("end+") else int(key)
 CONS_KEY = {"eps": "eps", "revenue_pct": "revenue_pct", "operating_margin": None}
 
 
@@ -1337,6 +1400,8 @@ def _when(qq, off):
 @st.cache_data(show_spinner=False)
 def track_rows(m, off):
     """Backtest rows for one headline number and one test date, with Wall Street's consensus on the same date."""
+    if S_.paths is not None:                        # any day: from the daily forecast path
+        return past_at(m, key_at(off))
     T = S_.track[(S_.track.offset.astype(str) == off) & (S_.track.metric == m)].set_index("quarter").copy()
     key = CONS_KEY[m]
     cons = pd.Series(np.nan, index=T.index)
@@ -1357,11 +1422,33 @@ def _miss(m, v):
     return "exact" if (m == "eps" and abs(v) < 0.005) or (m != "eps" and abs(v) < 0.05) else f"{size} too {'high' if v > 0 else 'low'}"
 
 
+QEND_DAY = 91          # the chart puts "quarter ends" at 91 (quarters are 90-92 days long) and the days after it beyond
+
+
+@st.cache_data(show_spinner=False)
+def miss_by_day(m) -> pd.DataFrame:
+    """Average miss of the forecast, Delta's guidance midpoint and Wall Street over the past quarters on every day of
+    the quarter (DAY_KEYS: day 14 to 89, then 1-7 days after the quarter ended), from forecast_path.csv."""
+    out = {}
+    for key in DAY_KEYS:
+        t = past_at(m, key_at(key))
+        out[key_x(key)] = {"Forecast": (t.forecast - t.actual).abs().mean(),
+                           "Delta's guidance midpoint": (t.guidance_mid - t.actual).abs().mean(),
+                           "Wall Street": (t.street - t.actual).abs().mean() if t.street.notna().any() else np.nan,
+                           "label": key_label(key)}
+    return pd.DataFrame(out).T
+
+
 def track_section(m, title, intro):
     st.subheader(title)
     md(intro)
-    off = st.segmented_control("Forecast made on", list(OFFSETS), default="45", format_func=lambda x: OFFSETS[x],
-                               key=f"off_{m}") or "45"
+    if S_.paths is not None:
+        off = st.select_slider("Forecast made on", DAY_KEYS, value="45", format_func=key_label, key=f"day_{m}")
+    else:
+        off = st.segmented_control("Forecast made on", list(OFFSETS), default="45", format_func=lambda x: OFFSETS[x],
+                                   key=f"off_{m}") or "45"
+    lab = key_label(off) if S_.paths is not None else OFFSETS[off]
+    lab = lab if "after" in lab else f"on {lab}"
     T = track_rows(m, off)
     n = len(T)
     side = lambda v, lo, hi: np.where(v < lo, "below", np.where(v > hi, "above", "inside"))
@@ -1382,7 +1469,7 @@ def track_section(m, title, intro):
         c[2].metric("Wall Street (same day)", unit(e_s.abs().mean()))
     c[-1].metric("Actual inside the forecast's 80% range", f"{inside} of {n}")
     md(f"<span class='small'>Average miss = average distance from what Delta reported ({'cents per share' if m == 'eps' else 'percentage points'}); "
-       f"smaller is better. Forecast made {OFFSETS[off]} of each quarter, Q3 2023 - Q2 2026, using only data public that "
+       f"smaller is better. Forecast made {lab} in each quarter, Q3 2023 - Q2 2026, using only data public that "
        f"day. The forecast was the closest of the {'three' if has_s else 'two'} in **{wins} of {n}** quarters and called the right side "
        f"of Delta's range (below / inside / above) in **{right} of {n}**. For reference, the simulator on its own, without "
        f"Delta's guidance, missed by {unit((T.simulator - T.actual).abs().mean())} on average.</span>", unsafe_allow_html=True)
@@ -1429,23 +1516,32 @@ def track_section(m, title, intro):
 
     # how the miss shrinks through the quarter
     md("**How the miss shrinks through the quarter**")
-    md("<span class='small'>Average miss at each point in the quarter. As more of the quarter becomes known, everyone "
+    md("<span class='small'>Average miss on each day of the quarter. As more of the quarter becomes known, everyone "
        "gets closer - the question is who gets there first.</span>", unsafe_allow_html=True)
-    pts = {"Forecast": [], "Delta's guidance midpoint": [], "Wall Street": []}
-    for o in OFFSETS:
-        Tt = track_rows(m, o)
-        pts["Forecast"].append((Tt.forecast - Tt.actual).abs().mean())
-        pts["Delta's guidance midpoint"].append((Tt.guidance_mid - Tt.actual).abs().mean())
-        pts["Wall Street"].append((Tt.street - Tt.actual).abs().mean() if Tt.street.notna().any() else np.nan)
-    labs = ["day 20", "day 45", "day 70", "after the quarter"]
     sc = 100 if m == "eps" else 1
     fig = go.Figure()
+    if S_.paths is not None:                       # every day of the quarter, from forecast_path.csv
+        M = miss_by_day(m)
+        xs, x_title = M.index, "day of the quarter, then days after it ended"
+        fig.add_vline(x=QEND_DAY, line=dict(color="#a3a29c", width=1, dash="dot"))
+        fig.add_annotation(x=QEND_DAY, y=1, yref="paper", text="quarter ends", showarrow=False, xanchor="left",
+                           font=dict(size=10, color=TEXT2))
+    else:                                          # older snapshot: the four test dates only
+        M = pd.DataFrame({name: [(track_rows(m, o)[col] - track_rows(m, o).actual).abs().mean() for o in OFFSETS]
+                          for name, col in [("Forecast", "forecast"), ("Delta's guidance midpoint", "guidance_mid"),
+                                            ("Wall Street", "street")]})
+        xs, x_title = ["day 20", "day 45", "day 70", "after the quarter"], None
     for name, colr, dash in [("Forecast", BLUE, "solid"), ("Delta's guidance midpoint", "#7a7974", "dot"), ("Wall Street", ORANGE, "dash")]:
-        v = np.array(pts[name], float) * sc
+        v = np.array(M[name], float) * sc
         if np.isnan(v).all():
             continue
-        fig.add_trace(go.Scatter(x=labs, y=v, mode="lines+markers", name=name, line=dict(color=colr, width=2.5, dash=dash),
-                                 marker=dict(size=8), hovertemplate=f"{name}: %{{y:.{0 if m == 'eps' else 2}f}}{'¢' if m == 'eps' else ' pts'}<extra></extra>"))
+        fig.add_trace(go.Scatter(x=xs, y=v, mode="lines", name=name, line=dict(color=colr, width=2.5, dash=dash), connectgaps=False,
+                                 customdata=M["label"] if "label" in M else None,
+                                 hovertemplate=(f"%{{customdata}} - " if "label" in M else "") +
+                                 f"{name}: %{{y:.{0 if m == 'eps' else 2}f}}{'¢' if m == 'eps' else ' pts'}<extra></extra>"))
+    if x_title:
+        fig.update_xaxes(title_text=x_title, tickvals=[14, 20, 30, 45, 60, 70, 80, 91, 98],
+                         ticktext=["14", "20", "30", "45", "60", "70", "80", "end", "+7 days"])
     fig.update_yaxes(title_text="average miss (¢ per share)" if m == "eps" else "average miss (pts)", rangemode="tozero")
     fig = layout(fig, 280)
     fig.update_layout(legend=dict(orientation="h", y=1.1, x=0, yanchor="bottom"), margin=dict(t=30), hovermode="x unified")

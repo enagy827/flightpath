@@ -239,6 +239,7 @@ def build_snapshot(ctx, today="2026-10-07", out: Path = SNAP, quarters=QUARTERS,
                              "BTS T-100 (published)": f"{ctx.truth.dropna().index.max():%Y-%m}",
                              "Delta filings (SEC)": f"{max(ctx.A.filed):%Y-%m-%d}"}}
     (out / "meta.json").write_text(json.dumps(meta, indent=1))
+    build_paths(out, log)
     log(f"snapshot written to {out}")
     return meta
 
@@ -267,6 +268,8 @@ class Snapshot:
         self.meta = json.loads((self.path / "meta.json").read_text())
         ch = self.path / "consensus_history.csv"
         self.cons_hist = pd.read_csv(ch, parse_dates=["date"]) if ch.exists() else None
+        fp = self.path / "forecast_path.csv"           # the forecast on every saved date (build_paths)
+        self.paths = pd.read_csv(fp, parse_dates=["date"]) if fp.exists() else None
         lk = self.path / "lock_2026Q3.json"
         self.lock = json.loads(lk.read_text()) if lk.exists() else None
         self.live = None            # set by the app when the raw data is on this machine: (q, d) -> entry
@@ -466,6 +469,29 @@ def interpret_event(headline: str, e: dict, events: dict, api_key: str, model: s
     lim = {"fuel_pct": (-50, 100), "capacity_pct": (-30, 15), "demand_pts": (-30, 15), "fare_pct": (-30, 30),
            "nonfuel_pct": (-15, 25), "outage": (0, 5)}
     out["levers"] = {k: float(np.clip(v, *lim[k])) for k, v in out["levers"].items()}
+    return out
+
+
+# ----------------------------------------------------------------------------------------------- daily forecast path
+def build_paths(snap_dir: Path = SNAP, log=print) -> pd.DataFrame:
+    """The forecast (EPS, margin, revenue: middle, 80% range, Delta's guidance range, and the simulator on its own) on
+    every date in the snapshot,
+    computed exactly as the app computes it for that date (same runs, same seed). Saved to forecast_path.csv so the
+    app can draw day-by-day charts without rerunning the simulator for every day. Needs only the snapshot."""
+    S = Snapshot(snap_dir)
+    rows = []
+    for q in sorted(S.dates):
+        for x in sorted(S.dates[q]):
+            e = S.entry(q, x)
+            if not e["news"]:
+                continue
+            R, Sm, _ = simulate(e, 50_000, Levers())
+            for m, f in forecast(e, R, Sm).items():
+                rows.append({"quarter": q, "date": f"{x:%Y-%m-%d}", "metric": m,
+                             **{k: f[k] for k in ("forecast", "low", "high", "p10", "p90", "simulator")}})
+        log(f"{q}: forecast path done")
+    out = pd.DataFrame(rows)
+    out.to_csv(Path(snap_dir) / "forecast_path.csv", index=False)
     return out
 
 
