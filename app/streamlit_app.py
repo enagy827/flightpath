@@ -40,11 +40,22 @@ div[data-testid="stMetricValue"] {font-size: 1.9rem;}
 
 # ------------------------------------------------------------------------------------------------ data
 @st.cache_resource
-def snap():
-    return Snapshot()
+def snap(version):
+    """The snapshot, loaded once per version: `version` changes whenever a snapshot file or the shared code changes,
+    so an updated copy (e.g. a new upload to the hosted app) is never served from the old one in memory."""
+    S = Snapshot()
+    if os.getenv("FLIGHTPATH_SHOW_IBES") != "1":        # licensed I/B/E/S consensus: off unless asked for
+        S.cons_hist = None                              # (Emma, 15 Oct 2026: off for the finals, as online)
+    return S
 
 
-S_ = snap()
+def _snap_version():
+    import flightpath.appdata as _ad
+    files = sorted((ROOT / "app" / "snapshot").glob("*")) + [Path(_ad.__file__)]
+    return tuple((f.name, f.stat().st_size, f.stat().st_mtime_ns) for f in files if f.is_file())
+
+
+S_ = snap(_snap_version())
 
 
 @st.cache_resource(show_spinner="This date isn't saved in the snapshot, so FlightPath is loading the raw data to work it "
@@ -1548,12 +1559,55 @@ def track_section(m, title, intro):
     st.plotly_chart(fig, width="stretch")
 
 
+def live_test(q):
+    """A call locked before Delta reported (notebook 08), scored against what Delta reported once it has."""
+    L, act = S_.locks[q], S_.actuals.get(q)
+    made = pd.Timestamp(L["made_at_utc"].replace(" UTC", ""))
+    qn = f"{q[-2:]} {q[:4]}"
+    with st.container(border=True):
+        md(f"##### Live test: {qn} - called before Delta reported")
+        if act:
+            filed = pd.Timestamp(act["filed"])
+            md(f"Locked on {made:%d %b %Y}, {(filed.normalize() - made.normalize()).days} days before Delta reported, "
+               f"and fingerprinted so it can't be changed afterwards. Scored against Delta's adjusted results of "
+               f"{filed:%d %b %Y}.")
+        else:
+            md(f"Locked on {made:%d %b %Y}, before Delta reports, and fingerprinted so it can't be changed afterwards. "
+               "It will be scored here once Delta reports.")
+        rows = []
+        for m in ["eps", "operating_margin", "revenue_pct"]:
+            f = L["forecast"][m]
+            lo, hi = f["guidance"]
+            rng = lambda a, b: f"{fmt(m, a)} to {fmt(m, b).lstrip('$')}"     # one $ per cell (two would render as math)
+            row = {"Result": NICE[m], "Delta's guidance": rng(lo, hi),
+                   "Locked forecast": fmt(m, f["value"]), "80% range": rng(f["p10"], f["p90"])}
+            if act:
+                a = act[m]
+                side = lambda v: "below" if v < lo else "above" if v > hi else "inside"
+                row.update({"Actual": fmt(m, a), "Forecast off by": _miss(m, f["value"] - a),
+                            "Guidance midpoint off by": _miss(m, (lo + hi) / 2 - a),
+                            "Inside the 80% range?": "yes" if f["p10"] <= a <= f["p90"] else "no",
+                            "Right side of Delta's range?": "yes" if side(f["value"]) == side(a) else "no"})
+            rows.append(row)
+        st.table(pd.DataFrame(rows).style.hide(axis="index"))
+        ws = S_.consensus_eps(q)
+        notes = []
+        if act and ws is not None:
+            notes.append(f"Wall Street's final EPS consensus before the report (press): {fmt('eps', ws)}, "
+                         f"{_miss('eps', ws - act['eps'])}.")
+        notes.append(f"Fingerprint (SHA-256 of the lock record): {L['sha256']}")
+        st.caption("  \n".join(notes))
+
+
 def page_track():
     st.title("Track record")
+    ws_txt = ("Delta's own guidance and Wall Street's consensus on the same day (LSEG I/B/E/S)" if S_.cons_hist is not None
+              else "Delta's own guidance (the comparison with Wall Street's consensus is summarised in the write-up)")
     md(f"{badge('fc')} How the forecast would have done in every past quarter, Q3 2023 - Q2 2026, using only the data "
-       f"public on each day - misses included - next to Delta's own guidance and Wall Street's consensus on the same day "
-       f"(LSEG I/B/E/S). Pick when the forecast was made in each section: early in the quarter little is known yet, after "
-       f"the quarter almost everything is.", unsafe_allow_html=True)
+       f"public on each day - misses included - next to {ws_txt}. Pick when the forecast was made in each section: "
+       f"early in the quarter little is known yet, after the quarter almost everything is.", unsafe_allow_html=True)
+    for lq in sorted(S_.locks, reverse=True):
+        live_test(lq)
     track_section("eps", "Adjusted EPS", "Profit per share, excluding one-off items.")
     track_section("operating_margin", "Operating margin",
                   "The share of revenue left as operating profit. No Wall Street consensus is available for margin in our "

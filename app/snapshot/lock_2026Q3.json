@@ -1,0 +1,45 @@
+{
+ "as_of_data": "2026-10-07",
+ "call_vs_consensus": "in line (forecast 1.92 vs consensus 1.88; 59% chance above)",
+ "call_vs_guidance": "EPS below guidance range",
+ "consensus_eps": 1.88,
+ "forecast": {
+  "eps": {
+   "chance_above_guidance_pct": 0.2,
+   "chance_below_guidance_pct": 70.6,
+   "guidance": [
+    2.0,
+    2.5
+   ],
+   "p10": 1.628,
+   "p90": 2.208,
+   "value": 1.921
+  },
+  "operating_margin": {
+   "chance_above_guidance_pct": 0.0,
+   "chance_below_guidance_pct": 79.4,
+   "guidance": [
+    11.0,
+    13.0
+   ],
+   "p10": 8.515,
+   "p90": 11.826,
+   "value": 10.166
+  },
+  "revenue_pct": {
+   "chance_above_guidance_pct": 58.9,
+   "chance_below_guidance_pct": 0.1,
+   "guidance": [
+    13.0,
+    17.0
+   ],
+   "p10": 14.441,
+   "p90": 19.655,
+   "value": 17.261
+  }
+ },
+ "made_at_utc": "2026-10-06 23:14 UTC",
+ "method": "forecaster (notebook 07): Delta's guidance midpoint + fuel news since 2026-07-10, 50,000 runs, seed 0",
+ "quarter": "2026Q3",
+ "second_view_simulator_eps": 1.351
+}

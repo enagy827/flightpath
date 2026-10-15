@@ -123,8 +123,28 @@ def as_range(row: pd.Series) -> tuple[float, float, str] | tuple[None, None, Non
     if pd.notna(lo) or pd.notna(hi):
         v = lo if pd.notna(lo) else hi
         return v, v, "stated bound"
+    ap = approx_number(row.get("wording")) if row.get("metric") == "total_revenue_yoy" else None
+    if ap is not None:
+        return ap, ap, "stated number (approx.)"
     wr = word_range(row.get("wording"))
     return (wr[0], wr[1], "words -> table") if wr else (None, None, None)
+
+
+# A single number given in words and nothing else, e.g. Delta's Q4 2026 table "Approx. 20%" (read by the AI as
+# "approximately 20 percent" with no number filled in). Revenue growth only, and only an exact match, so earlier
+# guidance stays as tested: checked 15 Oct 2026 over all 290 files, the only other revenue item it reads is Q2 2022
+# "~100%" of 2019, which in_force skips (growth vs 2019). Other metrics' "Up ~2%" items are deliberately left out.
+_APPROX = re.compile(r"(?:(up|down)\s+)?(?:approx(?:imately|\.)?|~|about|roughly)\s*([+-]?\d+(?:\.\d+)?)\s*(?:%|percent)")
+
+
+def approx_number(wording: str | None) -> float | None:
+    if not isinstance(wording, str):
+        return None
+    m = _APPROX.fullmatch(wording.strip().lower())
+    if not m:
+        return None
+    v = float(m.group(2))
+    return -abs(v) if m.group(1) == "down" else v
 
 
 _PART = re.compile(r"\b(domestic|international|mainline|regional|atlantic|pacific|latin|trans-?atlantic|"

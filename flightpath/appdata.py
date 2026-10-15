@@ -1,7 +1,7 @@
 """Data and calculations behind the FlightPath app (app/streamlit_app.py).
 
 The app does not need the raw data (2 minutes to load, several GB). `build_snapshot` runs the engine once - for every
-quarter Q3 2023 - Q3 2026, on every day from day 14 of the quarter to 14 days after it ends (or, with --weekly, every
+quarter Q3 2023 - Q4 2026, on every day from day 14 of the quarter to 14 days after it ends (or, with --weekly, every
 7 days plus the backtest dates) - and saves what the app needs to app/snapshot/
 (a few MB): each date's base case (inputs as public that day, error histories, links; market fuel only up to that
 day), the inputs for the "news since guidance" counterfactual, the track record, the live signals and the event
@@ -22,7 +22,7 @@ from .simulation.quarter import Levers, draw, evaluate
 from .simulation.timing import rest_shares
 
 SNAP = Path(__file__).resolve().parents[1] / "app" / "snapshot"
-QUARTERS = [str(q) for q in pd.period_range("2023Q3", "2026Q3", freq="Q")]
+QUARTERS = [str(q) for q in pd.period_range("2023Q3", "2026Q4", freq="Q")]
 GUIDED = {"eps": "eps", "operating_margin": "operating_margin", "revenue_pct": "total_revenue_yoy"}
 # Which news each forecast line uses (notebook 07): EPS and margin = guidance + fuel news (section 2);
 # revenue = guidance + fuel + capacity news (section 7e - provisional, adopted 7 Oct 2026).
@@ -223,14 +223,13 @@ def build_snapshot(ctx, today="2026-10-07", out: Path = SNAP, quarters=QUARTERS,
                                                  "measured_disruptions": measured_disruptions()}, indent=1))
     root = Path(__file__).resolve().parents[1]
     pd.read_csv(root / "data" / "wallstreet_consensus.csv").to_csv(out / "consensus.csv", index=False)
-    lock = ctx.data / "derived" / "lock_2026Q3.json"
-    if lock.exists():
-        import hashlib
-        body = lock.read_text()
-        (out / "lock_2026Q3.json").write_text(body)
-        meta_lock = hashlib.sha256(body.encode()).hexdigest()
-    else:
-        meta_lock = None
+    # locked calls (notebook 08), copied byte for byte so each file keeps its SHA-256 fingerprint
+    import hashlib
+    meta_lock = {}
+    for lock in sorted((ctx.data / "derived").glob("lock_*.json")):
+        body = lock.read_bytes()
+        (out / lock.name).write_bytes(body)
+        meta_lock[lock.stem.replace("lock_", "")] = hashlib.sha256(body).hexdigest()
     meta = {"built": pd.Timestamp.utcnow().strftime("%Y-%m-%d %H:%M UTC"), "today": f"{today:%Y-%m-%d}",
             "lock_sha256": meta_lock,
             "data_through": {"OpenSky flights (Delta + 5 rivals)": f"{ctx.osk_last_day:%Y-%m-%d}",
@@ -270,8 +269,13 @@ class Snapshot:
         self.cons_hist = pd.read_csv(ch, parse_dates=["date"]) if ch.exists() else None
         fp = self.path / "forecast_path.csv"           # the forecast on every saved date (build_paths)
         self.paths = pd.read_csv(fp, parse_dates=["date"]) if fp.exists() else None
-        lk = self.path / "lock_2026Q3.json"
-        self.lock = json.loads(lk.read_text()) if lk.exists() else None
+        # locked calls, by quarter (lock_<quarter>.json, notebook 08), with each file's SHA-256 fingerprint
+        import hashlib
+        self.locks = {}
+        for lk in sorted(self.path.glob("lock_*.json")):
+            body = lk.read_bytes().replace(b"\r\n", b"\n")        # a Windows copy may have CRLF line endings
+            self.locks[lk.stem.replace("lock_", "")] = {**json.loads(body), "sha256": hashlib.sha256(body).hexdigest()}
+        self.lock = self.locks.get("2026Q3")
         self.live = None            # set by the app when the raw data is on this machine: (q, d) -> entry
         self.dates = {}
         for k in self.entries:
